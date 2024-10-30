@@ -23,10 +23,13 @@ export async function POST(request: NextRequest) {
   const client = getSupabaseRouteHandlerClient({ admin: true });
   const challengeID = cookieStore.get('webauthn_state')?.value;
   const challenge = await getWebAuthnChallenge(client, challengeID!);
+  console.log('Challenge:', challenge);
   await deleteWebAuthnChallenge(client, challengeID!);
 
   const data = await request.json();
+  console.log('Data:', data);
   const credential = await getWebAuthnCredentialByCredentialId(client, data.id);
+  console.log('Credential:', credential);
   if (!credential) {
     return NextResponse.json(
       { error: 'Could not sign in with passkey' },
@@ -49,13 +52,14 @@ export async function POST(request: NextRequest) {
     requireUserVerification: false,
   };
   const verification = await verifyAuthenticationResponse(params);
-
+console.log('Verification:', verification);
   const { verified } = verification;
 
   const {
     data: { user },
   } = await client.auth.admin.getUserById(credential.user_id);
 
+  console.log('User:', user);
   if (verified) {
     await updateWebAuthnCredentialByCredentialId(
       client,
@@ -66,5 +70,6 @@ export async function POST(request: NextRequest) {
       },
     );
   }
+  console.log('NextResponse:');
   return NextResponse.json({ ...verification, user }, { status: 200 });
 }
