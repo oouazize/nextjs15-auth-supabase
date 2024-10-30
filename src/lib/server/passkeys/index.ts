@@ -47,6 +47,13 @@ export async function updateWebAuthnCredentialByCredentialId(
     .eq('credential_id', credentialId);
 }
 
+export async function deleteWebAuthnCredentialByCredentialId(
+  client: SupabaseClient<Database>,
+  credentialId: string,
+) {
+  await client.from('credentials').delete().eq('credential_id', credentialId);
+}
+
 export function insertWebAuthnChallenge(
   client: SupabaseClient<Database>,
   params: { user_id?: string; value: string },

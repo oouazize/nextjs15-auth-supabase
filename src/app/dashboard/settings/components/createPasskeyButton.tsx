@@ -1,6 +1,7 @@
 'use client';
 
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import Button from '~/core/ui/Button';
@@ -9,6 +10,7 @@ import { createPasskey } from '~/lib/server/passkeys';
 
 export default function CreatePasskeyButton() {
   const [creating, setCreating] = useState(false);
+  const router = useRouter();
 
   const handleCreatePasskey = async () => {
     try {
@@ -16,6 +18,7 @@ export default function CreatePasskeyButton() {
       const passkey = await createPasskey();
       console.log('Pass:', passkey);
       toast.success('Passkey created successfully');
+      router.refresh();
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
