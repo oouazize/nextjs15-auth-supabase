@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  console.log('Get challenge of the user');
+  console.log('Get challenge of the user', user.id);
   const challenge = await getWebAuthnChallengeByUser(client, user.id);
   console.log('Challenge:', challenge);
   if (challenge) {

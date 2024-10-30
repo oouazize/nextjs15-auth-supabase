@@ -52,13 +52,20 @@ export function insertWebAuthnChallenge(
   params: { user_id?: string; value: string },
 ) {
   if (params.user_id) {
-    return client.from('challenges').insert([params]).select('*').maybeSingle();
-  } else
+    // Use upsert to insert or update the challenge
+    return client
+      .from('challenges')
+      .upsert([params], { onConflict: 'user_id' })
+      .select('*')
+      .maybeSingle();
+  } else {
+    // Insert a new challenge without user_id
     return client
       .from('challenges')
       .insert([{ value: params.value }])
       .select('*')
       .maybeSingle();
+  }
 }
 
 export async function getWebAuthnChallengeByUser(
