@@ -8,6 +8,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/database.types';
 import CreatePasskeyButton from './components/createPasskeyButton';
 import PasskeysTable from './components/PasskeysTable';
+import PageHeader from '../components/pageHeader';
 
 export const metadata = {
   title: 'Settings',
@@ -33,22 +34,7 @@ async function PasskeysPage() {
 
   return (
     <>
-      <div className={'flex items-start justify-between p-container'}>
-        <div
-          className={
-            'flex space-x-2 items-center lg:items-start lg:flex-col' +
-            ' lg:space-x-0'
-          }
-        >
-          <Heading type={3}>
-            <span className={'flex items-center space-x-0.5 lg:space-x-2'}>
-              <span className={'font-semibold dark:text-white'}>
-                Manage your passkeys
-              </span>
-            </span>
-          </Heading>
-        </div>
-      </div>
+      <PageHeader title={'Manage your passkeys'} />
       <div className={'w-full px-container flex flex-col flex-1'}>
         <If condition={!count}>
           <PasskeysEmptyState />
