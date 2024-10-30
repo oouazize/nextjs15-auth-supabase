@@ -18,6 +18,7 @@ import {
 } from '~/lib/server/passkeys';
 
 export async function POST(request: NextRequest) {
+  console.log('Verifying passkey');
   const cookieStore = await cookies();
   const client = getSupabaseRouteHandlerClient({ admin: true });
   const challengeID = cookieStore.get('webauthn_state')?.value;
