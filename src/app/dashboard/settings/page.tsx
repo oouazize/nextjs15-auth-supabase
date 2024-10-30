@@ -1,5 +1,3 @@
-import { use } from 'react';
-
 import { withI18n } from '~/i18n/with-i18n';
 
 import Heading from '~/core/ui/Heading';
