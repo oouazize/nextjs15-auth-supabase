@@ -4,8 +4,12 @@ import {
 } from '@simplewebauthn/browser';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { isoUint8Array } from '@simplewebauthn/server/helpers';
-import { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import {
+  AuthenticatorTransportFuture,
+  PublicKeyCredentialCreationOptionsJSON,
+} from '@simplewebauthn/types';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { redirect } from 'next/navigation';
 import configuration from '~/configuration';
 import { Database } from '~/database.types';
 
@@ -47,7 +51,14 @@ export function insertWebAuthnChallenge(
   client: SupabaseClient<Database>,
   params: { user_id?: string; value: string },
 ) {
-  return client.from('challenges').insert([params]).select('*').maybeSingle();
+  if (params.user_id) {
+    return client.from('challenges').insert([params]).select('*').maybeSingle();
+  } else
+    return client
+      .from('challenges')
+      .insert([{ value: params.value }])
+      .select('*')
+      .maybeSingle();
 }
 
 export async function getWebAuthnChallengeByUser(
@@ -84,7 +95,7 @@ export async function deleteWebAuthnChallenge(
 export async function getRegistrationOptions(
   client: SupabaseClient<Database>,
   user: any,
-) {
+): Promise<PublicKeyCredentialCreationOptionsJSON> {
   const { credentials } = await listWebAuthnCredentialsForUser(client, user.id);
   const options = await generateRegistrationOptions({
     rpName: configuration.webauthn.relyingPartyName!,
@@ -103,6 +114,7 @@ export async function getRegistrationOptions(
       transports: credential.transports as AuthenticatorTransportFuture[],
     })),
   });
+
   return options;
 }
 
@@ -119,8 +131,14 @@ export function saveWebAuthnCredential(
 
 export async function createPasskey() {
   const options = await sendPOSTRequest('/api/passkeys/challenge');
-  const credential = await startRegistration(options);
+  console.log('Starting registration', options);
+  const credential = await startRegistration({
+    optionsJSON: options,
+    useAutoRegister: true,
+  });
+  console.log('Verifying registration', credential);
   const newPasskey = await sendPOSTRequest('/api/passkeys/verify', credential);
+  console.log('New passkey:', newPasskey);
   if (!newPasskey) {
     throw new Error('No passkey returned from server');
   }
@@ -142,19 +160,21 @@ async function sendPOSTRequest(url: string, data?: any) {
 
 export async function signInWithPasskey(useBrowserAutofill: boolean = false) {
   console.log('Signing in with passkey');
-  const options = await sendPOSTRequest('/auth/passkey');
+  const options = await sendPOSTRequest('/auth/webauthn/passkey');
   console.log('Starting authentication');
   const authenticationResponse = await startAuthentication({
     optionsJSON: options,
     useBrowserAutofill,
   });
   console.log('Verifying authentication response', authenticationResponse);
-  const { verified } = await sendPOSTRequest(
-    '/auth/passkey/verify',
+  const { verified, user } = await sendPOSTRequest(
+    '/auth/webauthn/passkey/verify',
     authenticationResponse,
   );
   if (!verified) {
-    throw new Error('Could not sign in with passkey');
+    return false;
   }
-  return { verified };
+  console.log('Creating session for user:', user);
+  await sendPOSTRequest('/auth/webauthn/session', user);
+  redirect(configuration.paths.appHome);
 }

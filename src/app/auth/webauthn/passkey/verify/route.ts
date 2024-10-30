@@ -1,5 +1,11 @@
-import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-import { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import {
+  verifyAuthenticationResponse,
+  VerifyAuthenticationResponseOpts,
+} from '@simplewebauthn/server';
+import {
+  AuthenticationResponseJSON,
+  AuthenticatorTransportFuture,
+} from '@simplewebauthn/types';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import configuration from '~/configuration';
@@ -10,20 +16,16 @@ import {
   getWebAuthnCredentialByCredentialId,
   updateWebAuthnCredentialByCredentialId,
 } from '~/lib/server/passkeys';
-import { sql } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
-  const client = getSupabaseRouteHandlerClient();
+  const client = getSupabaseRouteHandlerClient({ admin: true });
   const challengeID = cookieStore.get('webauthn_state')?.value;
-  console.log('Get challenge ID from cookies', challengeID);
   const challenge = await getWebAuthnChallenge(client, challengeID!);
-  console.log('Get challenge from DB', challenge);
   await deleteWebAuthnChallenge(client, challengeID!);
 
   const data = await request.json();
   const credential = await getWebAuthnCredentialByCredentialId(client, data.id);
-  console.log('Get credential from DB', credential);
   if (!credential) {
     return NextResponse.json(
       { error: 'Could not sign in with passkey' },
@@ -31,22 +33,27 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const verification = await verifyAuthenticationResponse({
+  const params: VerifyAuthenticationResponseOpts = {
     response: data,
     expectedChallenge: challenge?.value!,
     expectedOrigin: configuration.webauthn.relyingPartyOrigin!,
     expectedRPID: configuration.webauthn.relyingPartyID!,
     credential: {
       id: credential.credential_id,
-      publicKey: credential.public_key as unknown as Uint8Array,
+      publicKey: new Uint8Array(Buffer.from(credential.public_key, 'base64')),
       counter: credential.sign_count,
       transports:
         credential.transports as unknown as AuthenticatorTransportFuture[],
     },
-  });
-  console.log('Verify authentication', verification);
+    requireUserVerification: false,
+  };
+  const verification = await verifyAuthenticationResponse(params);
 
   const { verified } = verification;
+
+  const {
+    data: { user },
+  } = await client.auth.admin.getUserById(credential.user_id);
 
   if (verified) {
     await updateWebAuthnCredentialByCredentialId(
@@ -54,8 +61,9 @@ export async function POST(request: NextRequest) {
       credential.credential_id,
       {
         sign_count: verification.authenticationInfo.newCounter,
-        last_used_at: sql`now()` as unknown as string,
+        last_used_at: new Date().toISOString(),
       },
     );
   }
+  return NextResponse.json({ ...verification, user }, { status: 200 });
 }

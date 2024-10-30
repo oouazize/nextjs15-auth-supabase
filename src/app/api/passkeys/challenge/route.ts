@@ -11,16 +11,16 @@ export async function POST() {
   const {
     data: { user },
   } = await client.auth.getUser();
-  console.log('User:', user);
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
   const options = await getRegistrationOptions(client, user);
   console.log('options:', options);
 
-  await insertWebAuthnChallenge(client, {
+  const { data, error } = await insertWebAuthnChallenge(client, {
     user_id: user.id,
     value: options.challenge,
   });
+  console.log('Challenge:', data, error);
   return NextResponse.json(options, { status: 200 });
 }

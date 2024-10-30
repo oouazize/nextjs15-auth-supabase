@@ -14,6 +14,8 @@ export default function CreatePasskeyButton() {
     try {
       setCreating(true);
       const passkey = await createPasskey();
+      console.log('Pass:', passkey);
+      toast.success('Passkey created successfully');
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {

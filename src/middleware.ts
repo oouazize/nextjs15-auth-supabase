@@ -11,7 +11,7 @@ const NEXT_ACTION_HEADER = 'next-action';
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|locales|assets|auth/passkey).*)',
+    '/((?!_next/static|_next/image|favicon.ico|locales|assets|auth/webauthn|auth/webauthn/session|api/passkeys).*)',
   ],
 };
 

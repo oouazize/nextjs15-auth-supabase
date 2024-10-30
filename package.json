@@ -48,7 +48,7 @@
     "clsx": "^2.1.1",
     "cva": "npm:class-variance-authority@^0.7.0",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.35.3",
+    "dotenv": "^16.4.5",
     "heroicons": "^2.1.5",
     "i18next": "^23.16.4",
     "i18next-browser-languagedetector": "^8.0.0",
