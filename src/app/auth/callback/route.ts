@@ -6,7 +6,6 @@ import configuration from '~/configuration';
 import getSupabaseRouteHandlerClient from '~/core/supabase/route-handler-client';
 
 export async function GET(request: NextRequest) {
-  console.log('GET request');
   const requestUrl = new URL(request.url);
   const logger = getLogger();
   const searchParams = requestUrl.searchParams;

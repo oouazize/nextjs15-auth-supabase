@@ -10,6 +10,7 @@ import {
 } from '@simplewebauthn/types';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
+import { toast } from 'sonner';
 import configuration from '~/configuration';
 import { Database } from '~/database.types';
 
@@ -144,18 +145,25 @@ export function saveWebAuthnCredential(
 }
 
 export async function createPasskey() {
-  const options = await sendPOSTRequest('/api/passkeys/challenge');
-  console.log('Starting registration', options);
-  const credential = await startRegistration({
-    optionsJSON: options,
-  });
-  console.log('Verifying registration', credential);
-  const newPasskey = await sendPOSTRequest('/api/passkeys/verify', credential);
-  console.log('New passkey:', newPasskey);
-  if (!newPasskey) {
-    throw new Error('No passkey returned from server');
+  try {
+    const options = await sendPOSTRequest('/api/passkeys/challenge');
+    const credential = await startRegistration({
+      optionsJSON: options,
+    });
+    const newPasskey = await sendPOSTRequest(
+      '/api/passkeys/verify',
+      credential,
+    );
+    if (!newPasskey) {
+      throw new Error('No passkey returned from server');
+    }
+    return newPasskey;
+  } catch (error) {
+    if (error instanceof Error) {
+      toast.error(error.message);
+    }
+    return null;
   }
-  return newPasskey;
 }
 
 async function sendPOSTRequest(url: string, data?: any) {
@@ -165,29 +173,30 @@ async function sendPOSTRequest(url: string, data?: any) {
     body: JSON.stringify(data || ''),
   });
   if (!response.ok) {
-    console.log('error ===>', response);
-    throw new Error(`Failed to send POST request to ${url}`);
+    throw new Error((await response.json()).message);
   }
   return await response.json();
 }
 
 export async function signInWithPasskey(useBrowserAutofill: boolean = false) {
-  console.log('Signing in with passkey');
-  const options = await sendPOSTRequest('/auth/webauthn/passkey');
-  console.log('Starting authentication');
-  const authenticationResponse = await startAuthentication({
-    optionsJSON: options,
-    useBrowserAutofill,
-  });
-  console.log('Verifying authentication response', authenticationResponse);
-  const { verified, user } = await sendPOSTRequest(
-    '/auth/webauthn/passkey/verify',
-    authenticationResponse,
-  );
-  if (!verified) {
-    return false;
+  try {
+    const options = await sendPOSTRequest('/auth/webauthn/passkey');
+    const authenticationResponse = await startAuthentication({
+      optionsJSON: options,
+      useBrowserAutofill,
+    });
+    const { verified, user } = await sendPOSTRequest(
+      '/auth/webauthn/passkey/verify',
+      authenticationResponse,
+    );
+    if (!verified) {
+      return false;
+    }
+    await sendPOSTRequest('/auth/webauthn/session', user);
+    redirect(configuration.paths.appHome);
+  } catch (error) {
+    if (error instanceof Error) {
+      toast.error(error.message);
+    }
   }
-  console.log('Creating session for user:', user);
-  await sendPOSTRequest('/auth/webauthn/session', user);
-  redirect(configuration.paths.appHome);
 }

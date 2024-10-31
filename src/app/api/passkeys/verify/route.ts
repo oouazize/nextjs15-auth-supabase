@@ -15,29 +15,25 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await client.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    return NextResponse.json({ message: 'No User Found' }, { status: 404 });
   }
-  console.log('Get challenge of the user', user.id);
   const challenge = await getWebAuthnChallengeByUser(client, user.id);
-  console.log('Challenge:', challenge);
   if (challenge) {
     await deleteWebAuthnChallenge(client, challenge.id);
   }
 
   const data = await request.json();
-  console.log('Data:', data);
   const verification = await verifyRegistrationResponse({
     response: data,
     expectedChallenge: challenge?.value!,
     expectedOrigin: configuration.webauthn.relyingPartyOrigin!,
     expectedRPID: configuration.webauthn.relyingPartyID,
   });
-  console.log('Verification:', verification);
   const { verified } = verification;
   if (!verified) {
     return NextResponse.json(
-      { error: 'Could not verify passkey' },
-      { status: 401 },
+      { message: 'Verification failed' },
+      { status: 400 },
     );
   }
 
@@ -50,7 +46,9 @@ export async function POST(request: NextRequest) {
     credential_type: registrationInfo?.credentialType!,
     credential_id: registrationInfo?.credential.id!,
 
-    public_key: Buffer.from(registrationInfo?.credential.publicKey!).toString('base64'),
+    public_key: Buffer.from(registrationInfo?.credential.publicKey!).toString(
+      'base64',
+    ),
     aaguid: registrationInfo?.aaguid,
     sign_count: registrationInfo?.credential.counter!,
 
@@ -71,7 +69,6 @@ export async function POST(request: NextRequest) {
     client,
     values,
   );
-  console.log('Saved credential:', savedCredential);
   const passkeyDisplayData = {
     credential_id: savedCredential?.credential_id,
     friendly_name: savedCredential?.friendly_name,

@@ -7,20 +7,15 @@ import { insertWebAuthnChallenge } from '~/lib/server/passkeys';
 
 export async function POST() {
   const client = await getSupabaseRouteHandlerClient();
-  console.log('Generating authentication options');
   const options = await generateAuthenticationOptions({
     rpID: configuration.webauthn.relyingPartyID!,
     userVerification: 'preferred',
     allowCredentials: [],
   });
 
-  console.log('Store the challenge in DB: ', options);
-
   const { data: challenge } = await insertWebAuthnChallenge(client, {
     value: options.challenge,
   });
-
-  console.log('Store the challenge ID in the session', challenge);
 
   // Store the challenge ID in the "session"
   const cookieStore = await cookies();

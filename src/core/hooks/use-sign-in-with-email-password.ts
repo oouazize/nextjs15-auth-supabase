@@ -14,7 +14,6 @@ function useSignInWithEmailPassword() {
   const key = ['auth', 'sign-in-with-email-password'];
 
   return useMutation(key, (_, { arg: credentials }: { arg: Credentials }) => {
-    console.log('credentials', credentials);
     return client.auth.signInWithPassword(credentials).then((response: any) => {
       if (response.error) {
         throw response.error.message;

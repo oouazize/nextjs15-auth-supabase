@@ -8,9 +8,7 @@ const jwtIssuer = process.env.SUPABASE_AUTH_JWT_ISSUER;
 
 export async function POST(request: NextRequest) {
   const userData = await request.json();
-  console.log('User data:', userData);
   function createWebAuthnAccessTokenForUser(user: User) {
-    console.log('Creating access token for user:', user);
     const issuedAt = Math.floor(Date.now() / 1000);
     const expirationTime = issuedAt + 3600; // 1 hour expiry
     const payload = {
@@ -44,7 +42,7 @@ export async function POST(request: NextRequest) {
     refresh_token: accessToken,
   });
   if (error) {
-    return NextResponse.json(error.message, { status: 500 });
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
   return NextResponse.json({ status: 200 });
 }
