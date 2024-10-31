@@ -9,7 +9,6 @@ import {
   PublicKeyCredentialCreationOptionsJSON,
 } from '@simplewebauthn/types';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { redirect } from 'next/navigation';
 import { toast } from 'sonner';
 import configuration from '~/configuration';
 import { Database } from '~/database.types';
@@ -193,7 +192,7 @@ export async function signInWithPasskey(useBrowserAutofill: boolean = false) {
       return false;
     }
     await sendPOSTRequest('/auth/webauthn/session', user);
-    redirect(configuration.paths.appHome);
+    window.location.href = configuration.paths.appHome;
   } catch (error) {
     if (error instanceof Error) {
       toast.error(error.message);

@@ -226,16 +226,6 @@ function Pagination<T>({
       >
         <ChevronDoubleRightIcon className={'h-4'} />
       </IconButton>
-
-      <span className="flex items-center text-sm">
-        <Trans
-          i18nKey={'common:pageOfPages'}
-          values={{
-            page: table.getState().pagination.pageIndex + 1,
-            total: table.getPageCount(),
-          }}
-        />
-      </span>
     </div>
   );
 }
