@@ -1,18 +1,11 @@
-import { Provider } from '@supabase/supabase-js';
-
 const production = process.env.NODE_ENV === 'production';
-
-enum Themes {
-  Light = 'light',
-  Dark = 'dark',
-}
 
 const configuration = {
   site: {
-    name: 'UnitFit - Your Personal Fitness Coach',
-    description: 'Your Personal Fitness Coach',
+    name: 'Your product name',
+    description: 'Your product description',
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
-    siteName: 'UnitFit',
+    siteName: 'site Name',
     locale: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
   },
   auth: {
@@ -37,11 +30,3 @@ const configuration = {
 };
 
 export default configuration;
-
-function getBoolean(value: unknown, defaultValue: boolean) {
-  if (typeof value === 'string') {
-    return value === 'true';
-  }
-
-  return defaultValue;
-}
