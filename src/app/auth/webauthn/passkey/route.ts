@@ -22,7 +22,7 @@ export async function POST() {
   cookieStore.set('webauthn_state', challenge?.id!, {
     httpOnly: true,
     sameSite: true,
-    secure: !process.env.LOCAL,
+    secure: process.env.NODE_ENV === 'production',
   });
 
   return NextResponse.json(options, { status: 200 });
