@@ -12,25 +12,15 @@ import getLogger from '~/core/logger';
  * @param client
  * @param verifyFromServer
  */
-const requireSession = cache(
-  async (client: SupabaseClient<Database>, verifyFromServer = true) => {
-    const { data, error } = await client.auth.getSession();
+const requireSession = cache(async (client: SupabaseClient<Database>) => {
+  const { data, error } = await client.auth.getUser();
 
-    if (!data.session || error) {
-      return redirectToSignIn(error);
-    }
+  if (!data.user || error) {
+    return redirectToSignIn(error);
+  }
 
-    if (verifyFromServer) {
-      const { data: user, error } = await client.auth.getUser();
-
-      if (!user || error) {
-        redirectToSignIn(error, data.session?.user.id);
-      }
-    }
-
-    return data.session;
-  },
-);
+  return data.user;
+});
 
 export default requireSession;
 

@@ -5,7 +5,6 @@ import Fonts from '~/components/Fonts';
 
 import configuration from '~/configuration';
 import getLanguageCookie from '~/i18n/get-language-cookie';
-import { Toaster } from 'sonner';
 
 export default async function RootLayout({
   children,
@@ -18,10 +17,7 @@ export default async function RootLayout({
     <html lang={i18n.language}>
       <Fonts />
 
-      <body>
-        <Toaster richColors={false} />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

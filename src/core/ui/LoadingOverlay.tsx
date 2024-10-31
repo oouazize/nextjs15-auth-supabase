@@ -1,9 +1,9 @@
 import type { PropsWithChildren } from 'react';
 import classNames from 'clsx';
 
-import LogoImage from '~/core/ui/Logo/LogoImage';
 import If from '~/core/ui/If';
 import Spinner from '~/core/ui/Spinner';
+import LogoImage from './Logo/LogoImage';
 
 export default function LoadingOverlay({
   children,

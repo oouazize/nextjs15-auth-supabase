@@ -101,7 +101,7 @@ function PasskeysEmptyState() {
         </Heading>
 
         <Heading type={4}>
-          Create your first paskkey by clicking on the button below
+          Create your first passkey by clicking on the button below
         </Heading>
       </div>
     </div>

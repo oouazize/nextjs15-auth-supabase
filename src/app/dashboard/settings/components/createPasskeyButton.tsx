@@ -21,10 +21,6 @@ export default function CreatePasskeyButton() {
       router.refresh();
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          toast.error('This request has been cancelled by the user.');
-          return;
-        }
         toast.error(error.message);
       }
     } finally {

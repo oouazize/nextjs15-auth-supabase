@@ -1,19 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useCallback } from 'react';
-import useSupabase from '~/core/hooks/use-supabase';
+import React from 'react';
+import useSignOut from '~/core/hooks/use-sign-out';
 import Button from '~/core/ui/Button';
 import Heading from '~/core/ui/Heading';
 
 export default function PageHeader({ title }: { title: string }) {
-  const client = useSupabase();
-  const router = useRouter();
-
-  const signOut = useCallback(async () => {
-    await client.auth.signOut();
-    router.refresh();
-  }, [client.auth]);
+  const signOut = useSignOut();
 
   return (
     <div className={'flex items-start justify-between p-container'}>

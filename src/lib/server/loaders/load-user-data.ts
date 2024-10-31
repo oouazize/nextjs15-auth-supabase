@@ -14,29 +14,20 @@ async function loadUserData() {
   const client = getSupabaseServerComponentClient();
 
   try {
-    const { data, error } = await client.auth.getSession();
+    const { data, error } = await client.auth.getUser();
 
-    if (!data.session || error) {
+    if (!data.user || error) {
       return emptyUserData();
     }
 
-    const session = data.session;
-    const userId = session.user.id;
+    const user = data.user;
+    const userId = user.id;
 
     const userData = await getUserDataById(client, userId);
     const language = await getLanguage();
 
     return {
-      session: {
-        auth: {
-          accessToken: session.access_token,
-          user: {
-            id: session.user.id,
-            email: session.user.email!,
-          },
-        },
-        data: userData || undefined,
-      },
+      session: userData || undefined,
       language,
     };
   } catch (e) {
@@ -48,7 +39,6 @@ async function emptyUserData() {
   const language = await getLanguage();
 
   return {
-    accessToken: undefined,
     language,
     session: undefined,
   };

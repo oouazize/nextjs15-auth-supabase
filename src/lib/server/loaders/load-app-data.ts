@@ -29,9 +29,8 @@ const loadAppData = cache(async () => {
 
   try {
     const client = getSupabaseServerComponentClient();
-    const session = await requireSession(client);
+    const user = await requireSession(client);
 
-    const user = session.user;
     const userId = user.id;
 
     // we fetch the user record from the Database
@@ -46,13 +45,6 @@ const loadAppData = cache(async () => {
     return {
       language,
       csrfToken,
-      auth: {
-        accessToken: session.access_token,
-        user: {
-          id: user.id,
-          email: user.email,
-        },
-      },
       user: userRecord,
     };
   } catch (error) {

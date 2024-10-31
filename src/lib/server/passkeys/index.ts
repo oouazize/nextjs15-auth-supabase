@@ -148,7 +148,6 @@ export async function createPasskey() {
   console.log('Starting registration', options);
   const credential = await startRegistration({
     optionsJSON: options,
-    useAutoRegister: true,
   });
   console.log('Verifying registration', credential);
   const newPasskey = await sendPOSTRequest('/api/passkeys/verify', credential);

@@ -1,9 +1,9 @@
 import { createContext } from 'react';
-import type UserSession from '~/core/session/types/user-session';
+import UserData from '../types/user-data';
 
 const UserSessionContext = createContext<{
-  userSession: Maybe<UserSession>;
-  setUserSession: React.Dispatch<React.SetStateAction<Maybe<UserSession>>>;
+  userSession: Maybe<UserData>;
+  setUserSession: React.Dispatch<React.SetStateAction<Maybe<UserData>>>;
 }>({
   userSession: undefined,
   setUserSession: (_) => _,
